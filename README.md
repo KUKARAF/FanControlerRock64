@@ -7,9 +7,10 @@ save *.py file and create chrontab to run regularly
 write permission might have to be enabled for /sys/class/hwmon/hwmon0/pwm1 
 
 Usage: 
+automatic mode, enables fan if in specified values:
 
 python enable_fan.py 
-//(automatic mode, enables fan if in specified values)
 
-python ebable_fan.py force 90  (sets fan to desired strengh 0-100)
+Static fan speed to desired strengh 0-100:
 
+python ebable_fan.py force 90  
