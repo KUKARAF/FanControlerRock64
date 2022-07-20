@@ -1,13 +1,13 @@
-import os 
-import imp
+import os
+import importlib
 import sys
 import datetime
 
-pathPWM = "/sys/class/hwmon/hwmon0/pwm1"
+pathPWM = "/sys/devices/platform/pwm-fan/hwmon/hwmon3/pwm1"
 pathTEMP = "/sys/class/thermal/thermal_zone0/temp"
 pathLOG = "fan.log"
 tempMax = 70
-tempMin = 35 
+tempMin = 35
 
 
 def getTemp():
@@ -15,16 +15,16 @@ def getTemp():
         temp = int(f.read().replace('\n',''))
         return temp
 def getPWM(p=pathPWM):
-    with open(p,'r') as f: 
+    with open(p,'r') as f:
         return f.readlines()[0].replace('\n','')
 
-def logNow(): 
-    with open(pathLOG,'a') as f: 
+def logNow():
+    with open(pathLOG,'a') as f:
         f.write("\n temp: "+str(getTemp())+ " fanPWM: "+str(getPWM())+" date: "+ str(datetime.datetime.now()) )
 def tempToPWM(t=getTemp()/1000,mi=tempMin,ma=tempMax,maxPWM=255):
-    if t>ma: 
+    if t>ma:
         return maxPWM
-    elif t<mi: 
+    elif t<mi:
         return 0
     else:
         return ((t/mi)-1)*maxPWM
@@ -32,15 +32,15 @@ def percentToPWM(p):
     return round(255/100*p)
 
 def writeFanPWM(pwm):
-    with open(pathPWM, "w") as f: 
+    with open(pathPWM, "w") as f:
         f.write(str(150))
 
     if pwm > 255 or pwm < 0:
         raise ValueError('only values in range 0-255 allowed')
-    else: 
-        with open(pathPWM, "w") as f: 
+    else:
+        with open(pathPWM, "w") as f:
             if pwm < 60 and pwm>0:
-                f.write(str(60)) 
+                f.write(str(60))
                 print("set fan to "+str(round(60/255.0*100))+"%")
             else:
                 f.write(str(pwm))
@@ -48,12 +48,12 @@ def writeFanPWM(pwm):
             print( "temperature at "+ str(getTemp()/1000)+" C")
 
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     writeFanPWM(tempToPWM())
     #adjustTemp()
     #print(sys.argv)
     if  len(sys.argv) > 1:
-        if sys.argv[1] == 'force': 
+        if sys.argv[1] == 'force':
             print("Reason: user specified")
             writeFanPWM(percentToPWM(int(sys.argv[2])))
 
