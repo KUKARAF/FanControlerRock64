@@ -20,7 +20,7 @@ def getPWM(p=pathPWM):
 
 def logNow():
     with open(pathLOG,'a') as f:
-        f.write("temp: "+str(getTemp())+ " fanPWM: "+str(getPWM())+" date: "+ str(datetime.datetime.now())\n)
+        f.write("temp: "+str(getTemp())+ " fanPWM: "+str(getPWM())+" date: "+ str(datetime.datetime.now()) + "\n")
 def tempToPWM(t=getTemp()/1000,mi=tempMin,ma=tempMax,maxPWM=255):
     if t>ma:
         return maxPWM
