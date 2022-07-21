@@ -3,7 +3,7 @@ import importlib
 import sys
 import datetime
 
-pathPWM = "/sys/devices/platform/pwm-fan/hwmon/hwmon3/pwm1"
+pathPWM = "/sys/devices/platform/pwm-fan/hwmon/hwmon2/pwm1"
 pathTEMP = "/sys/class/thermal/thermal_zone0/temp"
 pathLOG = "fan.log"
 tempMax = 70
