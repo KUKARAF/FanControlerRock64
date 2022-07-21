@@ -2,7 +2,7 @@ import os
 import importlib
 import sys
 import datetime
-import getopt
+import argparse
 
 pathPWM = "/sys/devices/platform/pwm-fan/hwmon/hwmon2/pwm1"
 pathTEMP = "/sys/class/thermal/thermal_zone0/temp"
@@ -51,25 +51,12 @@ def writeFanPWM(pwm):
 
 if __name__ == "__main__":
 
-inputfile = ''
-outputfile = ''
-try:
-    opts, args = getopt.getopt(argv,"hfl",["help","min","max","force","log"])
-except getopt.GetoptError:
-    print 'test.py -i <inputfile> -o <outputfile>'
-    sys.exit(2)
-for opt, arg in opts:
-    if opt in ("-h", "--help"):
-        print 'test.py -i <inputfile> -o <outputfile>'
-        sys.exit()
-    elif opt in ("--min"):
-        inputfile = arg
-    elif opt in ("--max"):
-        outputfile = arg
-    elif opt in ("-f", "--force"):
-        inputfile = arg
-    elif opt in ("-l", "--log"):
-        outputfile = arg
+parser = argparse.ArgumentParser()
+parser.parse_args()
+parser.add_argument("--min", help="Static fan speed, values from 0-100")
+parser.add_argument("--max", help="Static fan speed, values from 0-100")
+parser.add_argument("-l", "--log", help="Static fan speed, values from 0-100")
+parser.add_argument("-f", "--force", type=int, choices=list(range(0, 101)), help="Static fan speed, values from 0-100")
 
     writeFanPWM(tempToPWM())
     print(sys.path[0])
