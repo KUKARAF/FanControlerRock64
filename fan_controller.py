@@ -51,12 +51,12 @@ def writeFanPWM(pwm):
 
 if __name__ == "__main__":
 
-parser = argparse.ArgumentParser()
-parser.parse_args()
-parser.add_argument("--min", help="Static fan speed, values from 0-100")
-parser.add_argument("--max", help="Static fan speed, values from 0-100")
-parser.add_argument("-l", "--log", help="Static fan speed, values from 0-100")
-parser.add_argument("-f", "--force", type=int, choices=list(range(0, 101)), help="Static fan speed, values from 0-100")
+    parser = argparse.ArgumentParser()
+    parser.parse_args()
+    parser.add_argument("--min", help="Static fan speed, values from 0-100")
+    parser.add_argument("--max", help="Static fan speed, values from 0-100")
+    parser.add_argument("-l", "--log", help="Static fan speed, values from 0-100")
+    parser.add_argument("-f", "--force", type=int, choices=list(range(0, 101)), help="Static fan speed, values from 0-100")
 
     writeFanPWM(tempToPWM())
     print(sys.path[0])
