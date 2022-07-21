@@ -5,13 +5,14 @@ import sys
 import datetime
 import argparse
 
-
-PWMPATH = "/sys/devices/platform/pwm-fan/hwmon/hwmon2/pwm1"
+CPUMONPATH = "/sys/class/thermal/thermal_zone0/temp"
+GPUMONPATH = "/sys/class/thermal/thermal_zone1/temp"
 PWMMAX = 255
+PWMPATH = "/sys/devices/platform/pwm-fan/hwmon/hwmon2/pwm1"
 
 
 def check_force():
-    ''' check if pwm value is forced '''
+    ''' check if PWM value is forced '''
     if args.force is not None:
         write_to_pwm(percentage_to_pwm(args.force))
         return
@@ -81,8 +82,8 @@ def get_temp_min():
 def get_temp_path():
     ''' returns path to temperature monitor '''
     if args.gpu:
-        return "/sys/class/thermal/thermal_zone1/temp"
-    return "/sys/class/thermal/thermal_zone0/temp"
+        return GPUMONPATH
+    return CPUMONPATH
 
 
 def percentage_to_pwm(percentage):
@@ -98,9 +99,14 @@ def pwm_to_percentage(pwm):
 def temperature_to_pwm():
     ''' returns a PWM value for a given temperature '''
     temperature = get_temp()
+    try:
+        get_temp_min() > get_temp_max()
+    except ValueError as exc:
+        raise ValueError(
+            "Minimum temperature can't be higher than maximum temperature.") from exc
     if temperature >= get_temp_max():
         return PWMMAX
-    if temperature < get_pwm_min():
+    if temperature < get_temp_min():
         return 0
     return round(PWMMAX / (get_temp_max() - get_temp_min())
                  * (temperature - get_temp_min()))
@@ -159,14 +165,6 @@ parser.add_argument("--gpu", action="store_true",
                     help="Use GPU temperature instead of CPU temperature.")
 
 args = parser.parse_args()
-
-
-try:
-    get_temp_min() > get_temp_max()
-except ValueError as exc:
-    raise ValueError(
-        "Minimum temperature can't be higher than maximum temperature.") from exc
-
 
 check_force()
 
