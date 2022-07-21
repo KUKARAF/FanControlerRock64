@@ -1,112 +1,143 @@
-import os
-import importlib
+''' controls fan speed on RockPro64 single board computer '''
+
+
 import sys
 import datetime
 import argparse
 
-def check100Range(arg):
+
+def check_range_0_100(arg):
+    ''' checks if argument is integer between 0 and 101 '''
     try:
         value = int(arg)
     except ValueError as err:
-       raise argparse.ArgumentTypeError(str(err))
+        raise argparse.ArgumentTypeError(str(err))
     if value < 0 or value > 100:
-        message = "Expected 0 <= value <= 100, got value = {}".format(value)
+        message = "Expected 0 <= value <= 100, got value = " + str(value)
         raise argparse.ArgumentTypeError(message)
     return value
 
-def getTemp():
-    with  open(pathTEMP, 'r') as f:
-        temp = int(f.read().replace('\n',''))
-        return temp / 1000
 
-def getPWM():
-    with open(pathPWM,'r') as f:
-        return f.readlines()[0].replace('\n','')
+def get_temp():
+    ''' gets temperature from hwmon, converts it to degrees celsius '''
+    with open(TEMPPATH, 'r', encoding="utf-8") as file:
+        temperature = int(file.read().replace('\n', ''))
+        return temperature / 1000
 
-def logNow():
-    with open(pathLOG,'a') as f:
-        f.write(str(datetime.datetime.now()) + " - Temperature: " + str(getTemp()) + "C - fanPWM: " + str(getPWM()) + "\n")
 
-def tempToPWM():
-    t = getTemp()
-    if t >= tempMax:
-        return maxPWM
-    if t < tempMin:
+def get_pwm():
+    ''' gets current PWM of fan '''
+    with open(PWMPATH, 'r', encoding="utf-8") as file:
+        return file.readlines()[0].replace('\n', '')
+
+
+def log_now():
+    ''' appends a logline to a logfile'''
+    with open(LOGPATH, 'a', encoding="utf-8") as file:
+        file.write(str(datetime.datetime.now()) + " - Temperature: " +
+                str(get_temp()) + "C - fanPWM: " + str(get_pwm()) + "\n")
+
+
+def temperature_to_pwm():
+    ''' returns a PWM value for a given temperature '''
+    temperature = get_temp()
+    if temperature >= TEMPMAX:
+        return PWMMAX
+    if temperature < PWMMIN:
         return 0
-    return round(maxPWM / (tempMax - tempMin) * (t - tempMin))
+    return round(PWMMAX / (TEMPMAX - TEMPMIN) * (temperature - TEMPMIN))
 
-def percentToPWM(p):
-    return round(p / 100 * maxPWM)
 
-def pwmToPercent(p):
-    return round(p / maxPWM * 100)
+def percentage_to_pwm(percentage):
+    ''' converts percentage to PWM value'''
+    return round(percentage / 100 * PWMMAX)
 
-def writeFanPWM(pwm):
-    print( "Current temperature: " + str(getTemp())+"C")
+
+def pwm_to_percentage(pwm):
+    ''' converts PWM value to percentage'''
+    return round(pwm / PWMMAX * 100)
+
+
+def write_to_pwm(pwm):
+    ''' checks PWM value, writes it to pwmfile and prints an output'''
+    print("Current temperature: " + str(get_temp())+"C")
     try:
         value = int(pwm)
-    except ValueError:
-        raise
-    if value < 0 or value > maxPWM:
-        raise ValueError("Expected 0 <= value <= " + maxPWM + ", got value = " + format(value))
-    else:
-        with open(pathPWM, "w") as f:
-            if pwm < minPWM and pwm > 0:
-                f.write(str(minPWM))
-                print("Fan set to minimum fan speed: " + str(pwmToPercent(minPWM)) + "% (fanPWM: " + str(minPWM) + ")")
-            else:
-                f.write(str(pwm))
-                print("Fan set to: " + str(pwmToPercent(pwm)) + "% (fanPWM: " + str(pwm) + ")")
+    except ValueError as err:
+        raise ValueError() from err
+    if value < 0 or value > PWMMAX:
+        raise ValueError("Expected 0 <= value <= " + PWMMAX +
+                         ", got value = " + format(value))
+    with open(PWMPATH, 'w', encoding="utf-8") as file:
+        if PWMMIN > pwm > 0:
+            file.write(str(PWMMIN))
+            print("Fan set to minimum fan speed: " +
+                  str(pwm_to_percentage(PWMMIN)) + "% (fanPWM: " + str(PWMMIN) + ")")
+        else:
+            file.write(str(pwm))
+            print("Fan set to: " + str(pwm_to_percentage(pwm)) +
+                  "% (fanPWM: " + str(pwm) + ")")
+
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--min", type=int, help="Fan will only switch on above set temperature threshold. Default: 40C.")
-parser.add_argument("--max", type=int, help="Fan speed will be maximum above set temperature. Default: 60C.")
-parser.add_argument("-l", "--log", action="store_true", help="Log to a file. Default: 'fan_controller.log' in same folder as 'fan_controller.py'. Set path with '--path'.")
-parser.add_argument("-p", "--path", help="Set path of logfile.")
-parser.add_argument("-f", "--force", type=check100Range, metavar="[0-100]", help="Set a static fan speed, values from 0-100.")
-parser.add_argument("--minpwm", type=check100Range, metavar="[0-100]", help="Set minimum fan speed. Default: 24 percent (fanPWM: 60).")
-parser.add_argument("--gpu", action="store_true", help="Use GPU temperature instead of CPU temperature.")
+parser.add_argument(
+    "--min", type=int,
+                    help="Fan will only switch on above set temperature threshold. Default: 40C.")
+parser.add_argument(
+    "--max", type=int, help="Fan speed will be maximum above set temperature. Default: 60C.")
+parser.add_argument("-l", "--log", action="store_true",
+                    help="Log to a file. Set path with '--path'.")
+parser.add_argument("-p", "--path",
+                    help="Set path of logfile. Default: 'fan_controller.log' in folder as script.")
+parser.add_argument("-f", "--force", type=check_range_0_100,
+                    metavar="[0-100]", help="Set a static fan speed, values from 0-100.")
+parser.add_argument("--minpwm", type=check_range_0_100,
+                    metavar="[0-100]",
+                    help="Set minimum fan speed. Default: 24 percent (fanPWM: 60).")
+parser.add_argument("--gpu", action="store_true",
+                    help="Use GPU temperature instead of CPU temperature.")
 
 args = parser.parse_args()
 
-pathPWM = "/sys/devices/platform/pwm-fan/hwmon/hwmon2/pwm1"
-maxPWM = 255
+PWMPATH = "/sys/devices/platform/pwm-fan/hwmon/hwmon2/pwm1"
+PWMMAX = 255
 
 if args.gpu:
-    pathTEMP = "/sys/class/thermal/thermal_zone1/temp"
+    TEMPPATH = "/sys/class/thermal/thermal_zone1/temp"
 else:
-    pathTEMP = "/sys/class/thermal/thermal_zone0/temp"
+    TEMPPATH = "/sys/class/thermal/thermal_zone0/temp"
 
 if args.path:
-    pathLOG = args.path
+    LOGPATH = args.path
 else:
-    pathLOG = str(sys.path[0]) + "/fan_controller.log"
+    LOGPATH = str(sys.path[0]) + "/fan_controller.log"
 
 if args.min is not None:
-    tempMin = int(args.min)
+    TEMPMIN = int(args.min)
 else:
-    tempMin = 40
+    TEMPMIN = 40
 
 if args.max is not None:
-    tempMax = int(args.max)
+    TEMPMAX = int(args.max)
 else:
-    tempMax = 60
+    TEMPMAX = 60
 
 try:
-    tempMin > tempMax
-except:
-    raise ValueError("Minimum temperature can't be higher than maximum temperature.")
+    TEMPMIN > TEMPMAX
+except ValueError as exc:
+    raise ValueError(
+        "Minimum temperature can't be higher than maximum temperature.") from exc
 
 if args.minpwm is not None:
-    minPWM = percentToPWM(args.minpwm)
+    PWMMIN = percentage_to_pwm(args.minpwm)
 else:
-    minPWM = 60
+    PWMMIN = 60
 
 if args.force is not None:
-    writeFanPWM(percentToPWM(args.force))
+    write_to_pwm(percentage_to_pwm(args.force))
 else:
-    writeFanPWM(tempToPWM())
+    write_to_pwm(temperature_to_pwm())
 
 if args.log:
-    logNow()
-    print(str(pathLOG))
+    log_now()
+    
