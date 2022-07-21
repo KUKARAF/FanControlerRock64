@@ -36,7 +36,7 @@ else:
 if args.log:
     pathLOG = args.log
 else:
-    pathLOG = sys.path[0] + "fan_controller.log"
+    pathLOG = sys.path[0] + "/fan_controller.log"
 
 if args.min is not None:
     tempMin = int(args.min)
@@ -82,7 +82,7 @@ def tempToPWM():
 
 def percentToPWM(p):
     return round(p / 100 * maxPWM)
-    
+
 def pwmToPercent(p):
     return round(p / maxPWM * 100)
 
