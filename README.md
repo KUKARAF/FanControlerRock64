@@ -1,8 +1,6 @@
 # RockPro64 Cooling Fan Controller
 
-Forked from: KUKARAF/FanControlerRock64
-
-Python script to control fan on a Pine64 RockPro64 single board computer. 
+Python script to control fan on a Pine64 RockPro64 single board computer. Useful on LibreELEC.
 
 ## Installation
 
@@ -17,7 +15,7 @@ python fan_controller/fan_controller.py
 
 ### Automatic mode
 
-Enables fan if temp between tempMax = 70 and  tempMin = 35 where tempMax is 100% fan speed and tempMin is 23%.
+Enables fan if temperature is between tempMax = 70 and tempMin = 35 where tempMax is 100% fan speed and tempMin is 23%.
 
 #### Configuration
 
