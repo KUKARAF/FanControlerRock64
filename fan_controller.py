@@ -48,21 +48,17 @@ def writeFanPWM(pwm):
                 print("set fan to "+str(round(pwm/255.0*100))+"%")
             print( "temperature at "+ str(getTemp()/1000)+" C")
 
-def argparseLoad():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--min", help="Static fan speed, values from 0-100")
-    parser.add_argument("--max", help="Static fan speed, values from 0-100")
-    parser.add_argument("-l", "--log", help="Static fan speed, values from 0-100")
-    parser.add_argument("-f", "--force", type=int, choices=list(range(0, 101)), help="Static fan speed, values from 0-100")
+parser = argparse.ArgumentParser()
+parser.add_argument("--min", help="Static fan speed, values from 0-100")
+parser.add_argument("--max", help="Static fan speed, values from 0-100")
+parser.add_argument("-l", "--log", help="Static fan speed, values from 0-100")
+parser.add_argument("-f", "--force", type=int, choices=list(range(0, 101)), metavar="[0-100]", help="Static fan speed, values from 0-100")
 
-if __name__ == "__main__":
+args = parser.parse_args()
 
-    argparseLoad()
-
+if not len(sys.argv) > 1
     writeFanPWM(tempToPWM())
-    if  len(sys.argv) > 1:
-        if sys.argv[1] == 'force':
-            print("Reason: user specified")
-            writeFanPWM(percentToPWM(int(sys.argv[2])))
+elif args.force:
+            writeFanPWM(percentToPWM(args.force))
 
     logNow()
