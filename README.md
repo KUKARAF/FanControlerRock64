@@ -4,12 +4,9 @@ Python script to control fan on a Pine64 RockPro64 single board computer. Useful
 
 ## Installation
 
-```
-mkdir fan_controller
-wget https://raw.githubusercontent.com/kromsam/FanControlerRockPro64/master/fan_controller.py -O fan_contr
-oller/fan_controller.py
-python fan_controller/fan_controller.py
-```
+```mkdir fan_controller```
+```wget https://raw.githubusercontent.com/kromsam/FanControlerRockPro64/master/fan_controller.py -O fan_controller/fan_controller.py
+```python fan_controller/fan_controller.py```
 
 ## Usage
 
@@ -28,4 +25,6 @@ Set up a cronjob (updates every minute in this example).
 
 Static fan speed to desired strengh 0-100:
 
-```python fan_controller/fan_controller.py force 90```
+```
+python fan_controller/fan_controller.py force 90
+```
