@@ -38,6 +38,7 @@ def writeFanPWM(pwm):
 
     if pwm > 255 or pwm < 0:
         raise ValueError('only values in range 0-255 allowed')
+        print('only values in range 0-255 allowed')
     else:
         with open(pathPWM, "w") as f:
             if pwm < 60 and pwm>0:
@@ -48,17 +49,27 @@ def writeFanPWM(pwm):
                 print("set fan to "+str(round(pwm/255.0*100))+"%")
             print( "temperature at "+ str(getTemp()/1000)+" C")
 
+def check_range(arg):
+    try:
+        value = int(arg)
+    except ValueError as err:
+       raise argparse.ArgumentTypeError(str(err))
+    if value < 0 or value > 100:
+        message = "Expected 0 <= value <= 100, got value = {}".format(value)
+        raise argparse.ArgumentTypeError(message)
+    return value
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--min", help="Static fan speed, values from 0-100")
 parser.add_argument("--max", help="Static fan speed, values from 0-100")
 parser.add_argument("-l", "--log", help="Static fan speed, values from 0-100")
-parser.add_argument("-f", "--force", type=int, choices=list(range(0, 101)), metavar="[0-100]", help="Static fan speed, values from 0-100")
+parser.add_argument("-f", "--force", type=check_range, metavar="[0-100]", help="Static fan speed, values from 0-100")
 
 args = parser.parse_args()
 
 if not len(sys.argv) > 1:
     writeFanPWM(tempToPWM())
-elif args.force:
+elif args.force is not None:
             writeFanPWM(percentToPWM(args.force))
 
 logNow()
