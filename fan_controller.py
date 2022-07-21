@@ -73,16 +73,16 @@ def write_to_pwm(pwm):
             file.write(str(PWMMIN))
             print("Fan set to minimum fan speed: " +
                   str(pwm_to_percentage(PWMMIN)) + "% (fanPWM: " + str(PWMMIN) + ")")
-        else:
-            file.write(str(pwm))
-            print("Fan set to: " + str(pwm_to_percentage(pwm)) +
+            return
+        file.write(str(pwm))
+        print("Fan set to: " + str(pwm_to_percentage(pwm)) +
                   "% (fanPWM: " + str(pwm) + ")")
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--min", type=int,
-                    help="Fan will only switch on above set temperature threshold. Default: 40C.")
+        help="Fan will only switch on above set temperature threshold. Default: 40C.")
 parser.add_argument(
     "--max", type=int, help="Fan speed will be maximum above set temperature. Default: 60C.")
 parser.add_argument("-l", "--log", action="store_true",
@@ -140,4 +140,3 @@ else:
 
 if args.log:
     log_now()
-    
