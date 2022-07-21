@@ -25,7 +25,7 @@ def getPWM():
 
 def logNow():
     with open(pathLOG,'a') as f:
-        f.write(str(datetime.datetime.now()) + "Temperature: " + str(getTemp()) + "C - fanPWM: " + str(getPWM()) + "\n")
+        f.write(str(datetime.datetime.now()) + " - Temperature: " + str(getTemp()) + "C - fanPWM: " + str(getPWM()) + "\n")
 
 def tempToPWM():
     t = getTemp()
@@ -61,7 +61,8 @@ def writeFanPWM(pwm):
 parser = argparse.ArgumentParser()
 parser.add_argument("--min", type=int, help="Fan will only switch on above set temperature threshold. Default: 40C.")
 parser.add_argument("--max", type=int, help="Fan speed will be maximum above set temperature. Default: 60C.")
-parser.add_argument("-l", "--log", nargs='?', default="fan_controller.log", help="Log to a file, setting filepath is optional. Default: 'fan_controller.log' in same folder as 'fan_controller.py'.")
+parser.add_argument("-l", "--log", action="store_true", help="Log to a file. Default: 'fan_controller.log' in same folder as 'fan_controller.py'. Set path with '--path'.")
+parser.add_argument("-p", "--path", help="Set path of logfile.")
 parser.add_argument("-f", "--force", type=check100Range, metavar="[0-100]", help="Set a static fan speed, values from 0-100.")
 parser.add_argument("--minpwm", type=check100Range, metavar="[0-100]", help="Set minimum fan speed. Default: 24 percent (fanPWM: 60).")
 parser.add_argument("--gpu", action="store_true", help="Use GPU temperature instead of CPU temperature.")
@@ -76,10 +77,10 @@ if args.gpu:
 else:
     pathTEMP = "/sys/class/thermal/thermal_zone0/temp"
 
-if args.log:
-    pathLOG = args.log
+if args.path:
+    pathLOG = args.path
 else:
-    pathLOG = sys.path[0] + "/fan_controller.log"
+    pathLOG = str(sys.path[0]) + "/fan_controller.log"
 
 if args.min is not None:
     tempMin = int(args.min)
@@ -97,7 +98,7 @@ except:
     raise ValueError("Minimum temperature can't be higher than maximum temperature.")
 
 if args.minpwm is not None:
-    minPWM = percentToPWM(args.minPWM)
+    minPWM = percentToPWM(args.minpwm)
 else:
     minPWM = 60
 
@@ -108,3 +109,4 @@ else:
 
 if args.log:
     logNow()
+    print(str(pathLOG))
