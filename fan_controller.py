@@ -50,6 +50,7 @@ def writeFanPWM(pwm):
 
 if __name__ == "__main__":
     writeFanPWM(tempToPWM())
+    print(sys.path[0])
     #adjustTemp()
     #print(sys.argv)
     if  len(sys.argv) > 1:
