@@ -4,12 +4,22 @@ import sys
 import datetime
 import argparse
 
+def check100Range(arg):
+    try:
+        value = int(arg)
+    except ValueError as err:
+       raise argparse.ArgumentTypeError(str(err))
+    if value < 0 or value > 100:
+        message = "Expected 0 <= value <= 100, got value = {}".format(value)
+        raise argparse.ArgumentTypeError(message)
+    return value
+
 parser = argparse.ArgumentParser()
-parser.add_argument("--min", help="Fan will only go on above set temperature. Default: 40C")
-parser.add_argument("--max", help="Temperature from which fan speed will be maximum. Default: 60C")
+parser.add_argument("--min", type=int, help="Fan will only go on above set temperature. Default: 40C")
+parser.add_argument("--max", type=int, help="Temperature from which fan speed will be maximum. Default: 60C")
 parser.add_argument("-l", "--log", nargs='?', default="fan_controller.log", help="Log to file. Default: 'fan_controller.log'.")
 parser.add_argument("-f", "--force", type=check100Range, metavar="[0-100]", help="Set a static fan speed, values from 0-100.")
-parser.add_argument("--minpwm", type=check100Range, metavar="[0-100]", help="Set minimum fan speed. Default: 24% (fanPWM: 60).")
+parser.add_argument("--minpwm", type=check100Range, metavar="[0-100]", help="Set minimum fan speed. Default: 24 percent (fanPWM: 60).")
 args = parser.parse_args()
 
 pathPWM = "/sys/devices/platform/pwm-fan/hwmon/hwmon2/pwm1"
@@ -22,12 +32,12 @@ else:
     pathLOG = sys.path[0] + "fan_controller.log"
 
 if args.min is not None:
-    tempMin = args.min
+    tempMin = int(args.min)
 else:
     tempMin = 40
 
 if args.max is not None:
-    tempMax = args.max
+    tempMax = int(args.max)
 else:
     tempMax = 60
 
@@ -81,19 +91,10 @@ def writeFanPWM(pwm):
                 f.write(str(pwm))
                 print("Fan set to: " + str(pwmToPercent(pwm)) + "% (fanPWM: " + str(pwm) + ")")
 
-def check100Range(arg):
-    try:
-        value = int(arg)
-    except ValueError as err:
-       raise argparse.ArgumentTypeError(str(err))
-    if value < 0 or value > 100:
-        message = "Expected 0 <= value <= 100, got value = {}".format(value)
-        raise argparse.ArgumentTypeError(message)
-    return value
-
-if not len(sys.argv) > 1:
-    writeFanPWM(tempToPWM())
-elif args.force is not None:
+if args.force is not None:
     writeFanPWM(percentToPWM(args.force))
-elif args.log:
+else:
+    writeFanPWM(tempToPWM())
+
+if args.log:
     logNow()
