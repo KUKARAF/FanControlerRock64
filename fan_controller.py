@@ -56,9 +56,9 @@ parser.add_argument("-f", "--force", type=int, choices=list(range(0, 101)), meta
 
 args = parser.parse_args()
 
-if not len(sys.argv) > 1
+if not len(sys.argv) > 1:
     writeFanPWM(tempToPWM())
 elif args.force:
             writeFanPWM(percentToPWM(args.force))
 
-    logNow()
+logNow()
