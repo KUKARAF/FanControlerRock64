@@ -1,5 +1,7 @@
 # FanControlerRock64
 
+*OBSOLETE*  please use [dietpie's fan controller](https://github.com/MichaIng/DietPi/blob/master/.meta/dietpi-fan_control)
+
 simple fan controller for the ROCK64 pine single board computer. 
 
 installation: 
